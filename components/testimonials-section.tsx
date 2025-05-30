@@ -48,17 +48,22 @@ export default function TestimonialsSection() {
     async function loadTestimonials() {
       try {
         setIsLoading(true)
+        console.log("🔍 Loading testimonials from WordPress...")
 
-        // Try to fetch from WordPress (client-side only)
         const response = await fetch("https://nxteradigital.com/wp/wp-json/wp/v2/testimonials?_embed&per_page=10", {
           method: "GET",
           headers: {
             Accept: "application/json",
           },
+          cache: "no-store", // Force fresh data
         })
+
+        console.log("📡 Testimonials response status:", response.status)
 
         if (response.ok) {
           const wpTestimonials = await response.json()
+          console.log("💬 Testimonials received:", wpTestimonials.length)
+
           if (Array.isArray(wpTestimonials) && wpTestimonials.length > 0) {
             const formattedTestimonials = wpTestimonials.map((testimonial) => ({
               id: testimonial.id,
@@ -67,12 +72,17 @@ export default function TestimonialsSection() {
               position: testimonial.acf?.position || "Valued Client",
               avatar: testimonial.acf?.avatar || "/testimonial-1.png",
             }))
+
+            console.log("✅ Setting WordPress testimonials:", formattedTestimonials)
             setTestimonials(formattedTestimonials)
+          } else {
+            console.log("⚠️ No testimonials found in WordPress")
           }
+        } else {
+          console.log("❌ WordPress testimonials API error:", response.status)
         }
       } catch (error) {
-        console.log("Using fallback testimonials:", error)
-        // Keep fallback testimonials
+        console.error("❌ Error loading testimonials:", error)
       } finally {
         setIsLoading(false)
       }

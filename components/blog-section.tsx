@@ -49,23 +49,28 @@ export default function BlogSection() {
     async function loadPosts() {
       try {
         setIsLoading(true)
+        console.log("🔍 Loading posts from WordPress...")
 
-        // Try to fetch from WordPress (client-side only)
         const response = await fetch("https://nxteradigital.com/wp/wp-json/wp/v2/posts?_embed&per_page=3", {
           method: "GET",
           headers: {
             Accept: "application/json",
           },
+          cache: "no-store", // Force fresh data
         })
+
+        console.log("📡 WordPress response status:", response.status)
 
         if (response.ok) {
           const posts = await response.json()
+          console.log("📝 Posts received:", posts.length)
+
           if (Array.isArray(posts) && posts.length > 0) {
             const formattedPosts = posts.map((post) => ({
               id: post.id,
               title: post.title.rendered,
               slug: post.slug,
-              excerpt: post.excerpt.rendered.replace(/<[^>]*>/g, ""),
+              excerpt: post.excerpt.rendered.replace(/<[^>]*>/g, "").substring(0, 150) + "...",
               date: new Date(post.date).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
@@ -74,12 +79,17 @@ export default function BlogSection() {
               author: post._embedded?.["author"]?.[0]?.name || "Nxtera Digital Team",
               image: post._embedded?.["wp:featuredmedia"]?.[0]?.source_url || "/placeholder.svg?height=400&width=600",
             }))
+
+            console.log("✅ Setting WordPress posts:", formattedPosts)
             setBlogPosts(formattedPosts)
+          } else {
+            console.log("⚠️ No posts found in WordPress")
           }
+        } else {
+          console.log("❌ WordPress API error:", response.status)
         }
       } catch (error) {
-        console.log("Using fallback blog posts:", error)
-        // Keep fallback posts
+        console.error("❌ Error loading posts:", error)
       } finally {
         setIsLoading(false)
       }
