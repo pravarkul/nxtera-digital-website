@@ -3,8 +3,8 @@
  * Properly handles subdirectory WordPress installation
  */
 
-// WordPress API URL - CORRECTED for subdirectory
-const WORDPRESS_API_URL = "https://nxteradigital.com/wp-json/wp/v2"
+// WordPress API URL - SUBDOMAIN VERSION
+const WORDPRESS_API_URL = "https://wp.nxteradigital.com/wp-json/wp/v2"
 
 // Hardcoded services for main page display
 const HARDCODED_SERVICES = [
