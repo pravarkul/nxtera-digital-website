@@ -23,7 +23,7 @@ const HARDCODED_SERVICES = [
     title: "Website Optimization",
     description:
       "Improve your website's performance, speed, and user experience to increase conversions and search rankings.",
-    image: "/website-optimization.png",
+    image: "/placeholder.svg?height=400&width=600",
     icon: "Search",
     slug: "website-optimization",
   },
@@ -32,7 +32,7 @@ const HARDCODED_SERVICES = [
     title: "Social Media Management",
     description:
       "Comprehensive social media strategy and management across all platforms to build your brand presence.",
-    image: "/social-media.png",
+    image: "/placeholder.svg?height=400&width=600",
     icon: "Share2",
     slug: "social-media-management",
   },
@@ -40,7 +40,7 @@ const HARDCODED_SERVICES = [
     id: 3,
     title: "Performance Marketing",
     description: "Data-driven marketing campaigns focused on measurable results and maximum return on investment.",
-    image: "/performance-marketing.png",
+    image: "/placeholder.svg?height=400&width=600",
     icon: "TrendingUp",
     slug: "performance-marketing",
   },
@@ -48,7 +48,7 @@ const HARDCODED_SERVICES = [
     id: 4,
     title: "Email Marketing",
     description: "Strategic email campaigns that nurture leads, engage customers, and drive conversions.",
-    image: "/email-marketing.png",
+    image: "/placeholder.svg?height=400&width=600",
     icon: "Mail",
     slug: "email-marketing",
   },
@@ -57,7 +57,7 @@ const HARDCODED_SERVICES = [
     title: "Video Editing",
     description:
       "Professional video editing services to create compelling visual content for your marketing campaigns.",
-    image: "/video-editing.png",
+    image: "/placeholder.svg?height=400&width=600",
     icon: "Video",
     slug: "video-editing",
   },
@@ -66,7 +66,7 @@ const HARDCODED_SERVICES = [
     title: "Local SEO",
     description:
       "Optimize your local search presence to attract customers in your area and dominate local search results.",
-    image: "/local-seo.png",
+    image: "/placeholder.svg?height=400&width=600",
     icon: "Search",
     slug: "local-seo",
   },
@@ -75,7 +75,7 @@ const HARDCODED_SERVICES = [
     title: "Graphic Designing",
     description:
       "Creative graphic design solutions for all your marketing materials, from brochures to digital assets.",
-    image: "/graphic-design.png",
+    image: "/placeholder.svg?height=400&width=600",
     icon: "PenTool",
     slug: "graphic-designing",
   },
@@ -83,7 +83,7 @@ const HARDCODED_SERVICES = [
     id: 8,
     title: "Content Marketing",
     description: "Strategic content creation and distribution to attract, engage, and convert your target audience.",
-    image: "/content-marketing.png",
+    image: "/placeholder.svg?height=400&width=600",
     icon: "Globe",
     slug: "content-marketing",
   },
@@ -111,9 +111,7 @@ const FALLBACK_POSTS = [
       </ul>
       
       <h2>Stay Connected</h2>
-      <p>Subscribe to our newsletter to get the latest updates delivered directly to your inbox. We're committed to providing valuable content that helps your business succeed in the digital landscape.</p>
-      
-      <p>Have questions or topics you'd like us to cover? Feel free to reach out to us!</p>
+      <p>Subscribe to our newsletter to get the latest updates delivered directly to your inbox.</p>
     `,
     date: "December 26, 2024",
     author: "Nxtera Digital Team",
@@ -127,8 +125,7 @@ const FALLBACK_POSTS = [
 const FALLBACK_TESTIMONIALS = [
   {
     id: 1,
-    quote:
-      "We're excited to work with Nxtera Digital and look forward to sharing our success stories with you soon. Their professional approach and expertise give us confidence in achieving our marketing goals.",
+    quote: "We're excited to work with Nxtera Digital and look forward to sharing our success stories with you soon.",
     author: "Future Client",
     position: "Business Owner",
     avatar: "/testimonial-1.png",
@@ -136,7 +133,7 @@ const FALLBACK_TESTIMONIALS = [
   {
     id: 2,
     quote:
-      "Nxtera Digital's comprehensive approach to digital marketing aligns perfectly with our business objectives. We're eager to see the results of our partnership.",
+      "Nxtera Digital's comprehensive approach to digital marketing aligns perfectly with our business objectives.",
     author: "Prospective Partner",
     position: "Marketing Director",
     avatar: "/testimonial-2.png",
@@ -144,37 +141,44 @@ const FALLBACK_TESTIMONIALS = [
 ]
 
 /**
- * Fetch with proper error handling and CORS support
+ * Enhanced fetch with better error handling and logging
  */
-async function fetchWithRetry(url: string, options: RequestInit = {}, retries = 2): Promise<Response> {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          ...options.headers,
-        },
-      })
+async function fetchFromWordPress(endpoint: string, options: RequestInit = {}) {
+  const url = `${WORDPRESS_API_URL}${endpoint}`
 
-      if (response.ok) {
-        return response
-      }
+  console.log(`🔍 Fetching from WordPress: ${url}`)
 
-      if (i === retries - 1) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-    } catch (error) {
-      if (i === retries - 1) {
-        throw error
-      }
-      // Wait before retry
-      await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)))
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "Nxtera-Digital-Website/1.0",
+        ...options.headers,
+      },
+      // Add timeout
+      signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined,
+    })
+
+    console.log(`📡 WordPress API Response: ${response.status} ${response.statusText}`)
+
+    if (!response.ok) {
+      throw new Error(`WordPress API Error: ${response.status} ${response.statusText}`)
     }
-  }
 
-  throw new Error("Max retries exceeded")
+    const data = await response.json()
+    console.log(`✅ WordPress data received:`, {
+      endpoint,
+      dataType: Array.isArray(data) ? "array" : typeof data,
+      length: Array.isArray(data) ? data.length : "N/A",
+    })
+
+    return data
+  } catch (error) {
+    console.error(`❌ WordPress API Error for ${endpoint}:`, error)
+    throw error
+  }
 }
 
 /**
@@ -192,15 +196,7 @@ export async function getServiceBySlug(slug: string) {
   console.log("🔍 Fetching service details from WordPress for slug:", slug)
 
   try {
-    const url = `${WORDPRESS_API_URL}/services?slug=${slug}&_embed&status=publish&_=${Date.now()}`
-    console.log("📡 Service URL:", url)
-
-    const response = await fetchWithRetry(url, {
-      signal: createTimeoutSignal(10000),
-    })
-
-    const services = await response.json()
-    console.log("✅ Service search result:", services.length > 0 ? "Found" : "Not found")
+    const services = await fetchFromWordPress(`/services?slug=${slug}&_embed&status=publish`)
 
     if (!Array.isArray(services) || services.length === 0) {
       console.log("⚠️ Service not found in WordPress, using hardcoded fallback")
@@ -222,7 +218,7 @@ export async function getServiceBySlug(slug: string) {
             </ul>
             
             <h3>Why Choose Nxtera Digital</h3>
-            <p>With years of experience and a proven track record, our team delivers results that matter. We combine industry best practices with innovative approaches to ensure your success.</p>
+            <p>With years of experience and a proven track record, our team delivers results that matter.</p>
             
             <p><strong>Note:</strong> This content can be customized by creating a service with the slug "${slug}" in your WordPress admin.</p>
           `,
@@ -242,19 +238,7 @@ export async function getServiceBySlug(slug: string) {
           <h2>About ${hardcodedService.title}</h2>
           <p>${hardcodedService.description}</p>
           
-          <h3>What's Included</h3>
-          <ul>
-            <li>Comprehensive strategy development</li>
-            <li>Expert implementation and execution</li>
-            <li>Regular monitoring and optimization</li>
-            <li>Detailed reporting and analytics</li>
-            <li>Ongoing support and consultation</li>
-          </ul>
-          
-          <h3>Why Choose Nxtera Digital</h3>
-          <p>With years of experience and a proven track record, our team delivers results that matter. We combine industry best practices with innovative approaches to ensure your success.</p>
-          
-          <p><strong>Note:</strong> This content can be customized by creating a service with the slug "${slug}" in your WordPress admin.</p>
+          <p><strong>Note:</strong> WordPress content not available. Please check your WordPress setup.</p>
         `,
       }
     }
@@ -269,15 +253,7 @@ export async function getPosts(page = 1, perPage = 10) {
   console.log("🔍 Fetching posts from WordPress...")
 
   try {
-    const url = `${WORDPRESS_API_URL}/posts?_embed&page=${page}&per_page=${perPage}&status=publish&_=${Date.now()}`
-    console.log("📡 Posts URL:", url)
-
-    const response = await fetchWithRetry(url, {
-      signal: createTimeoutSignal(10000),
-    })
-
-    const posts = await response.json()
-    console.log("✅ Posts fetched successfully:", posts.length, "posts")
+    const posts = await fetchFromWordPress(`/posts?_embed&page=${page}&per_page=${perPage}&status=publish`)
 
     if (!Array.isArray(posts) || posts.length === 0) {
       console.log("⚠️ No posts found, using fallback")
@@ -298,15 +274,7 @@ export async function getPostBySlug(slug: string) {
   console.log("🔍 Fetching post by slug:", slug)
 
   try {
-    const url = `${WORDPRESS_API_URL}/posts?slug=${slug}&_embed&status=publish&_=${Date.now()}`
-    console.log("📡 Post URL:", url)
-
-    const response = await fetchWithRetry(url, {
-      signal: createTimeoutSignal(10000),
-    })
-
-    const posts = await response.json()
-    console.log("✅ Post search result:", posts.length > 0 ? "Found" : "Not found")
+    const posts = await fetchFromWordPress(`/posts?slug=${slug}&_embed&status=publish`)
 
     if (!Array.isArray(posts) || posts.length === 0) {
       console.log("⚠️ Post not found, using fallback")
@@ -327,18 +295,7 @@ export async function getTestimonials() {
   console.log("🔍 Fetching testimonials from WordPress...")
 
   try {
-    const url = `${WORDPRESS_API_URL}/testimonials?_embed&per_page=100&status=publish&_=${Date.now()}`
-    console.log("📡 Testimonials URL:", url)
-
-    const response = await fetchWithRetry(url, {
-      signal: createTimeoutSignal(10000),
-    })
-
-    const testimonials = await response.json()
-    console.log("✅ Testimonials API response:", {
-      isArray: Array.isArray(testimonials),
-      length: Array.isArray(testimonials) ? testimonials.length : 0,
-    })
+    const testimonials = await fetchFromWordPress(`/testimonials?_embed&per_page=100&status=publish`)
 
     if (!Array.isArray(testimonials) || testimonials.length === 0) {
       console.log("⚠️ No testimonials found in WordPress, using fallback testimonials")
@@ -387,13 +344,6 @@ function formatService(service: any) {
   const featuredMedia = service._embedded?.["wp:featuredmedia"]?.[0]
   const acfFields = service.acf || {}
 
-  console.log("🔧 Formatting service:", {
-    id: service.id,
-    title: service.title?.rendered,
-    acf: acfFields,
-    featuredMedia: featuredMedia?.source_url,
-  })
-
   return {
     id: service.id,
     title: service.title.rendered,
@@ -412,12 +362,6 @@ function formatService(service: any) {
  */
 function formatTestimonial(testimonial: any) {
   const acfFields = testimonial.acf || {}
-
-  console.log("🔧 Formatting testimonial:", {
-    id: testimonial.id,
-    title: testimonial.title?.rendered,
-    acf: acfFields,
-  })
 
   return {
     id: testimonial.id,
@@ -440,14 +384,45 @@ export async function getCompanyInfo() {
   }
 
   try {
-    const response = await fetchWithRetry(`${WORDPRESS_API_URL}/company-info`, {
-      signal: createTimeoutSignal(5000),
-    })
-
-    const data = await response.json()
+    const data = await fetchFromWordPress(`/company-info`)
     return { ...fallbackInfo, ...data }
   } catch (error) {
     console.warn("❌ Error fetching company info from WordPress, using fallback:", error)
     return fallbackInfo
   }
+}
+
+/**
+ * Test WordPress API connectivity
+ */
+export async function testWordPressAPI() {
+  const tests = [
+    { name: "WordPress API Root", url: "" },
+    { name: "Posts Endpoint", url: "/posts" },
+    { name: "Services Endpoint", url: "/services" },
+    { name: "Testimonials Endpoint", url: "/testimonials" },
+  ]
+
+  const results = []
+
+  for (const test of tests) {
+    try {
+      const data = await fetchFromWordPress(test.url)
+      results.push({
+        name: test.name,
+        url: `${WORDPRESS_API_URL}${test.url}`,
+        ok: true,
+        data: Array.isArray(data) ? `Array with ${data.length} items` : typeof data,
+      })
+    } catch (error) {
+      results.push({
+        name: test.name,
+        url: `${WORDPRESS_API_URL}${test.url}`,
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+
+  return results
 }

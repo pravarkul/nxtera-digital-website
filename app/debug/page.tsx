@@ -59,6 +59,40 @@ export default function DebugPage() {
               </Button>
             </div>
 
+            {/* Current WordPress URLs */}
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>WordPress Configuration</CardTitle>
+                <CardDescription>Current WordPress API endpoints being used</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div>
+                    <strong>WordPress Admin:</strong>{" "}
+                    <a
+                      href="https://nxteradigital.com/wp/wp-admin"
+                      target="_blank"
+                      className="text-blue-600 hover:underline"
+                      rel="noreferrer"
+                    >
+                      https://nxteradigital.com/wp/wp-admin
+                    </a>
+                  </div>
+                  <div>
+                    <strong>API Base URL:</strong>{" "}
+                    <a
+                      href="https://nxteradigital.com/wp/wp-json/wp/v2"
+                      target="_blank"
+                      className="text-blue-600 hover:underline"
+                      rel="noreferrer"
+                    >
+                      https://nxteradigital.com/wp/wp-json/wp/v2
+                    </a>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* API Endpoint Tests */}
             <Card className="mb-8">
               <CardHeader>
@@ -86,34 +120,27 @@ export default function DebugPage() {
                       </div>
                       <p className="text-sm text-muted-foreground mt-1">{test.url}</p>
                       {test.error && <p className="text-sm text-red-600 mt-2">Error: {test.error}</p>}
-                      {test.data && (
-                        <details className="mt-2">
-                          <summary className="text-sm cursor-pointer">View Response Data</summary>
-                          <pre className="text-xs bg-gray-100 p-2 rounded mt-2 overflow-auto">
-                            {JSON.stringify(test.data, null, 2)}
-                          </pre>
-                        </details>
-                      )}
+                      {test.data && <p className="text-sm text-green-600 mt-2">Data: {test.data}</p>}
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Services Data */}
+            {/* Testimonials Data */}
             <Card className="mb-8">
               <CardHeader>
-                <CardTitle>Services Data ({services.length})</CardTitle>
-                <CardDescription>Services loaded from WordPress or fallback</CardDescription>
+                <CardTitle>Testimonials Data ({testimonials.length})</CardTitle>
+                <CardDescription>Testimonials loaded from WordPress or fallback</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {services.slice(0, 4).map((service) => (
-                    <div key={service.id} className="p-4 border rounded-lg">
-                      <h3 className="font-medium">{service.title}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">{service.description}</p>
+                <div className="space-y-4">
+                  {testimonials.map((testimonial) => (
+                    <div key={testimonial.id} className="p-4 border rounded-lg">
+                      <h3 className="font-medium">{testimonial.author}</h3>
+                      <p className="text-sm text-muted-foreground mt-1">"{testimonial.quote}"</p>
                       <div className="text-xs text-muted-foreground mt-2">
-                        ID: {service.id} | Slug: {service.slug} | Icon: {service.icon}
+                        ID: {testimonial.id} | Position: {testimonial.position}
                       </div>
                     </div>
                   ))}
@@ -144,80 +171,26 @@ export default function DebugPage() {
               </CardContent>
             </Card>
 
-            {/* Testimonials Data */}
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Testimonials ({testimonials.length})</CardTitle>
-                <CardDescription>Testimonials loaded from WordPress or fallback</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {testimonials.map((testimonial) => (
-                    <div key={testimonial.id} className="p-4 border rounded-lg">
-                      <h3 className="font-medium">{testimonial.author}</h3>
-                      <p className="text-sm text-muted-foreground mt-1">"{testimonial.quote}"</p>
-                      <div className="text-xs text-muted-foreground mt-2">
-                        ID: {testimonial.id} | Position: {testimonial.position}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Instructions */}
+            {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle>Troubleshooting Steps</CardTitle>
+                <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4 text-sm">
-                  <div>
-                    <h4 className="font-medium">1. Check WordPress Installation</h4>
-                    <p className="text-muted-foreground">
-                      Visit{" "}
-                      <a
-                        href="https://nxteradigital.com/wp/wp-admin"
-                        target="_blank"
-                        className="text-blue-600 hover:underline"
-                        rel="noreferrer"
-                      >
-                        https://nxteradigital.com/wp/wp-admin
-                      </a>{" "}
-                      to ensure WordPress is installed and accessible.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium">2. Test REST API Directly</h4>
-                    <p className="text-muted-foreground">
-                      Visit{" "}
-                      <a
-                        href="https://nxteradigital.com/wp/wp-json/wp/v2/"
-                        target="_blank"
-                        className="text-blue-600 hover:underline"
-                        rel="noreferrer"
-                      >
-                        https://nxteradigital.com/wp/wp-json/wp/v2/
-                      </a>{" "}
-                      to check if the REST API is working.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium">3. Check Custom Post Types</h4>
-                    <p className="text-muted-foreground">
-                      Ensure you've created "Services" and "Testimonials" custom post types and they're enabled for REST
-                      API.
-                    </p>
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium">4. Add Sample Content</h4>
-                    <p className="text-muted-foreground">
-                      Create at least one service and one testimonial in WordPress admin to test the integration.
-                    </p>
-                  </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <a href="https://nxteradigital.com/wp/wp-admin" target="_blank" rel="noreferrer" className="block">
+                    <Button className="w-full">Open WordPress Admin</Button>
+                  </a>
+                  <a
+                    href="https://nxteradigital.com/wp/wp-json/wp/v2/testimonials"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block"
+                  >
+                    <Button variant="outline" className="w-full">
+                      Test Testimonials API
+                    </Button>
+                  </a>
                 </div>
               </CardContent>
             </Card>
