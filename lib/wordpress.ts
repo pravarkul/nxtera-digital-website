@@ -1,22 +1,12 @@
 /**
- * WordPress API utilities - Hybrid approach
- * - Services list: Hardcoded for main page
- * - Service details: From WordPress
- * - Blog posts: From WordPress
- * - Testimonials: From WordPress
+ * WordPress API utilities - FIXED VERSION
+ * Properly handles subdirectory WordPress installation
  */
 
-// Create a timeout signal for fetch requests
-function createTimeoutSignal(timeoutMs: number): AbortSignal {
-  const controller = new AbortController()
-  setTimeout(() => controller.abort(), timeoutMs)
-  return controller.signal
-}
+// WordPress API URL - CORRECTED for subdirectory
+const WORDPRESS_API_URL = "https://nxteradigital.com/wp-json/wp/v2"
 
-// WordPress API URL
-const WORDPRESS_API_URL = "https://nxteradigital.com/wp/wp-json/wp/v2"
-
-// Hardcoded services for main page display only
+// Hardcoded services for main page display
 const HARDCODED_SERVICES = [
   {
     id: 1,
@@ -89,7 +79,7 @@ const HARDCODED_SERVICES = [
   },
 ]
 
-// Fallback data for when WordPress is not available
+// Fallback data
 const FALLBACK_POSTS = [
   {
     id: 1,
@@ -141,7 +131,7 @@ const FALLBACK_TESTIMONIALS = [
 ]
 
 /**
- * Enhanced fetch with better error handling and logging
+ * Enhanced fetch with proper error handling
  */
 async function fetchFromWordPress(endpoint: string, options: RequestInit = {}) {
   const url = `${WORDPRESS_API_URL}${endpoint}`
@@ -158,7 +148,7 @@ async function fetchFromWordPress(endpoint: string, options: RequestInit = {}) {
         ...options.headers,
       },
       // Add timeout
-      signal: AbortSignal.timeout ? AbortSignal.timeout(10000) : undefined,
+      signal: AbortSignal.timeout ? AbortSignal.timeout(15000) : undefined,
     })
 
     console.log(`📡 WordPress API Response: ${response.status} ${response.statusText}`)
@@ -182,7 +172,7 @@ async function fetchFromWordPress(endpoint: string, options: RequestInit = {}) {
 }
 
 /**
- * Get services for main page display (always returns hardcoded data)
+ * Get services for main page (hardcoded)
  */
 export async function getServices() {
   console.log("📋 Loading services for main page (hardcoded)")
@@ -190,7 +180,7 @@ export async function getServices() {
 }
 
 /**
- * Get service details from WordPress for individual service pages
+ * Get service details from WordPress
  */
 export async function getServiceBySlug(slug: string) {
   console.log("🔍 Fetching service details from WordPress for slug:", slug)
@@ -247,7 +237,7 @@ export async function getServiceBySlug(slug: string) {
 }
 
 /**
- * Fetch posts from WordPress with fallback
+ * Fetch posts from WordPress
  */
 export async function getPosts(page = 1, perPage = 10) {
   console.log("🔍 Fetching posts from WordPress...")
@@ -268,7 +258,7 @@ export async function getPosts(page = 1, perPage = 10) {
 }
 
 /**
- * Fetch a single post by slug with fallback
+ * Fetch a single post by slug
  */
 export async function getPostBySlug(slug: string) {
   console.log("🔍 Fetching post by slug:", slug)
@@ -289,7 +279,7 @@ export async function getPostBySlug(slug: string) {
 }
 
 /**
- * Fetch testimonials from WordPress with fallback
+ * Fetch testimonials from WordPress
  */
 export async function getTestimonials() {
   console.log("🔍 Fetching testimonials from WordPress...")
